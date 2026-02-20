@@ -1,0 +1,127 @@
+:root {
+  --bg: #0b0d10;
+  --panel: #13161a;
+  --border: #1f2328;
+  --text: #e6edf3;
+  --muted: #9aa4af;
+  --accent: #4f7cff;
+  --ok: #15b374;
+}
+
+@media (max-width: 768px) {
+  .brand-bar { flex-direction: column; gap: 6px; }
+  .brand-left img, .brand-right img, .brand-center img {
+    height: 45px;
+  }
+}
+@media (max-width: 480px) {
+  .brand-bar { flex-direction: column; align-items: center; }
+  .brand-left, .brand-right { display: none; } /* opcional, se quiser esconder laterais no celular */
+  .brand-center img { height: 50px; }
+}
+
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu; }
+
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 22px; border-bottom:1px solid var(--border); background: #0f1216;
+}
+.brand { display:flex; align-items:center; gap:14px; }
+.logo { height: 42px; object-fit: contain; }
+.subtitle { color: var(--muted); font-size: 13px; }
+
+.container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+
+.card {
+  background: var(--panel); border:1px solid var(--border); border-radius: 14px;
+  padding: 18px; margin-bottom: 18px;
+}
+
+.field { display:flex; flex-direction:column; gap:6px; margin-bottom: 14px; }
+.grid-2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:14px; }
+.inline { display:flex; gap:14px; flex-wrap:wrap; }
+
+.btn {
+  display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--border);
+  background:#12161b; color: var(--text); text-decoration:none; cursor:pointer;
+}
+.btn.primary { background: var(--accent); border-color: transparent; color: white; }
+.btn.success { background: var(--ok); border-color: transparent; color: #07160f; }
+
+.muted { color: var(--muted); }
+
+.progress { width:100%; height: 10px; border-radius: 10px; background:#0e1115; overflow:hidden; border:1px solid var(--border); }
+.progress .bar { height:100%; width:0%; background: linear-gradient(90deg, #6aa1ff, #8b5cf6); transition: width .6s ease; }
+
+.log {
+  background:#0e1115; border:1px solid var(--border); border-radius:10px; padding:12px; max-height:260px; overflow:auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:13px;
+}
+
+.grid.thumbs {
+  display:grid; gap:12px; grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+}
+.thumb {
+  border:1px solid var(--border); border-radius:10px; padding:8px; background:#0e1115;
+}
+.thumb img { width:100%; height:160px; object-fit:cover; border-radius:6px; display:block; }
+.thumb .mini { display:inline-block; margin-top:6px; font-size:12px; color:#b7c4ff; }
+
+/* === Header responsivo: NEAD | IMAGO | UNL === */
+.brand-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+/* Tamanho padrão (desktop/notebook) */
+.brand-left img,
+.brand-center img,
+.brand-right img{
+  height:60px;   /* pode subir para 70px se preferir */
+  width:auto;
+  display:block;
+}
+
+/* Tablet (≤ 768px): já organiza vertical, IMAGO ao centro, laterais acima/abaixo */
+@media (max-width: 768px){
+  .brand-bar{
+    flex-direction:column;
+    gap:8px;
+  }
+  .brand-left img,
+  .brand-right img{ height:44px; }
+  .brand-center img{ height:52px; }
+}
+
+/* Celular pequeno (≤ 480px): layout B bem compacto, IMAGO mais proeminente */
+@media (max-width: 480px){
+  .brand-bar{
+    flex-direction:column;
+    gap:6px;
+  }
+  /* Ordem vertical: NEAD (topo), IMAGO (meio), UNL (base) */
+  .brand-left  { order:1; }
+  .brand-center{ order:2; }
+  .brand-right { order:3; }
+
+  .brand-left img,
+  .brand-right img{ height:40px; }
+  .brand-center img{ height:56px; } /* IMAGO fica levemente maior e central */
+}
+
+/* Monitores grandes (≥ 1400px): IMAGO um pouco maior, sem exagero */
+@media (min-width: 1400px){
+  .brand-center img{ height:70px; }
+}
+
+/* ==== HEADER HARMÔNICO (UNL | IMAGO | NEAD) ==== */
+.header-wrap .logo{
+  display:block; height:clamp(40px, 6.5vh, 70px); width:auto; object-fit:contain;
+  filter: drop-shadow(0
+}
+

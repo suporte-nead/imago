@@ -1,0 +1,28 @@
+PASSO A PASSO PARA RODAR O BUSCADOR
+
+1- abrir o cmd na pasta do projeto
+
+2- Apague a venv antiga (para garantir um ambiente limpo)
+rmdir /s /q .venv
+
+3- Crie novamente a venv na pasta correta
+python -m venv .venv
+
+4- Ative a venv
+.\.venv\Scripts\activate
+
+Verifique se aparece (.venv) no início da linha.
+
+5- Agora instale as dependências
+python -m pip install -r requirements.txt
+
+6- Instale:
+python -m pip install Pillow
+python -m pip install pymupdf python-docx
+python -m pip install google-genai google-generativeai
+python -m pip install -U "httpx>=0.28.1,<1.0.0"
+
+
+
+7- Por fim, rode o app:
+python app.py

@@ -1,0 +1,39 @@
+:root { --bg:#0b0f14; --card:#121923; --muted:#94a3b8; --accent:#3b82f6; --accent-2:#22c55e; --text:#e5e7eb; --danger:#ef4444; }
+*{box-sizing:border-box}
+body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;line-height:1.55}
+.container{max-width:1100px;margin:0 auto;padding:32px 20px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.brand{display:flex;align-items:center;gap:16px}
+.logoimg{height:34px;width:auto;object-fit:contain;background:#0e1520;border:1px solid rgba(148,163,184,0.2);border-radius:8px;padding:4px}
+h1{font-size:22px;margin:0}
+p.lead{color:var(--muted);margin:4px 0 0}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.005));border:1px solid rgba(148,163,184,0.15);border-radius:18px;padding:22px;box-shadow:0 4px 24px rgba(0,0,0,0.25)}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(12,1fr)}
+.col-12{grid-column:span 12}
+.col-6{grid-column:span 6}
+.btn{background:var(--accent);color:#fff;border:none;padding:12px 16px;border-radius:12px;cursor:pointer;font-weight:600;transition:transform .05s ease}
+.btn.secondary{background:#1f2937;color:var(--text);border:1px solid rgba(148,163,184,0.25)}
+.btn:active{transform:translateY(1px)}
+input[type=file],select,input[type=text],textarea{width:100%;padding:12px 14px;background:#0e1520;color:var(--text);border:1px solid rgba(148,163,184,0.25);border-radius:12px}
+.muted{color:var(--muted);font-size:13px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.thumb{background:#0e1520;border:1px solid rgba(148,163,184,0.2);border-radius:14px;overflow:hidden}
+.thumb img{display:block;width:100%;height:220px;object-fit:cover}
+.thumb .actions{display:flex;gap:8px;padding:12px}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#0e1520;border:1px solid rgba(148,163,184,0.2);font-size:12px;color:var(--muted)}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.link{background:#0e1520;border:1px solid rgba(148,163,184,0.25);color:var(--text);padding:10px 12px;border-radius:12px;text-decoration:none}
+.error{color:var(--danger);font-weight:600}
+footer{margin-top:32px;color:var(--muted);font-size:13px}
+
+/* Overlay de progresso */
+#progressOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9999}
+.progressCard{background:#0e1520;border:1px solid rgba(148,163,184,0.25);border-radius:16px;max-width:480px;width:90%;padding:18px;box-shadow:0 6px 30px rgba(0,0,0,.45)}
+.progressTitle{margin:0 0 10px 0;font-weight:700}
+.progressBar{height:10px;border-radius:999px;background:#0b1220;border:1px solid rgba(148,163,184,.25);overflow:hidden}
+.progressFill{height:100%;width:40%;background:linear-gradient(90deg,var(--accent),var(--accent-2));animation:indeterminate 1.4s infinite}
+@keyframes indeterminate{
+  0%{transform:translateX(-100%)}
+  50%{transform:translateX(60%)}
+  100%{transform:translateX(160%)}
+}

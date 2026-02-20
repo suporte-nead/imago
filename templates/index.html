@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IMAGO - Ilustração Mágica de Textos</title>
+  <!-- Carregamento do Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Configuração de tema do Tailwind (Cor de destaque e fonte Inter) -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class', // Habilita o modo escuro via classe 'dark' no HTML
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            // NOVO: Cor principal para botões, foco e destaque (VERMELHO)
+            'primary-red': '#e53935',
+            'dark-card': '#111217',
+            'dark-stroke': '#24242a',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+    /* Fundo com Gradiente Moderno e Adaptativo 
+        A cor de fundo principal e o gradiente são definidos aqui para maior controle visual.
+        */
+    .bg-gradient-modern {
+      background-color: #0c0c0f;
+      /* Cor de fundo base do modo escuro */
+      /* Gradiente VERMELHO sutil no topo no Dark Mode */
+      background-image: radial-gradient(circle at 50% 10%, rgba(229, 57, 53, 0.1), transparent 50%),
+        radial-gradient(1200px 600px at 50% -10%, #17171c, transparent);
+      transition: background-color 0.5s;
+    }
+
+    .dark .bg-gradient-modern {
+      /* Mantém o fundo escuro com o gradiente sutil no dark mode */
+      background-color: #0c0c0f;
+    }
+
+    .input-modern {
+      /* Estilo base para todos os campos (input, textarea, select) */
+      padding: 12px 14px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07);
+    }
+
+    /* DARK MODE STYLING */
+    .dark .input-modern {
+      background-color: #0b0b10;
+      border: 1px solid #1e1f25;
+      color: #e7e7ea;
+    }
+
+    .dark .input-modern:focus {
+      background-color: #111217;
+      border-color: #e53935;
+      /* Cor primária VERMELHA no foco */
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.3);
+      /* Anel de foco VERMELHO */
+    }
+
+    /* LIGHT MODE STYLING - CORRIGIDO PARA BRANCO PURO */
+    .light .bg-gradient-modern {
+      background-color: white;
+      /* Fundo branco puro no modo claro */
+      background-image: none;
+    }
+
+    .light .card-modern {
+      background-color: white;
+      border-color: #e0e0e0;
+    }
+
+    .light .input-modern {
+      background-color: white;
+      border: 1px solid #d1d5db;
+      color: #1f2937;
+    }
+
+    .light .input-modern:focus {
+      border-color: #e53935;
+      /* Cor primária VERMELHA no foco */
+      box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.3);
+    }
+
+    /* Ajustes para o modo claro */
+    .light .text-gray-300 {
+      color: #1f2937 !important;
+    }
+
+    .light .dark\:text-gray-200 {
+      color: #1f2937 !important;
+    }
+
+    .light .dark\:bg-dark-card\/80 {
+      background-color: white !important;
+    }
+
+    .light .dark\:border-gray-700 {
+      border-color: #e0e0e0 !important;
+    }
+
+    .light .dark\:text-gray-400 {
+      color: #4b5563 !important;
+    }
+
+    .light .dark\:bg-dark-stroke {
+      background-color: #f3f4f6 !important;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-modern min-h-screen font-sans">
+
+  <main class="container max-w-4xl mx-auto p-4 md:p-6">
+
+    <header class="vheader grid grid-cols-3 items-center mt-2 mb-8 relative">
+
+  <!-- Logo esquerda -->
+  <div class="flex justify-start items-center">
+    <img class="h-14 object-contain" src="/static/UNL.png" alt="Universidade Nilton Lins">
+  </div>
+
+  <!-- Logo central -->
+  <div class="flex justify-center items-center">
+    <img class="h-16 object-contain" src="/static/IMAGONEW.png" alt="IMAGO — Ilustração Mágica de Textos">
+  </div>
+
+  <!-- Logo direita -->
+  <div class="flex justify-end items-center">
+    <img class="h-14 object-contain" src="/static/NEAD.png" alt="NEAD Premium">
+  </div>
+
+  
+
+</header>
+     <!-- Botão de Alternar Tema -->
+      <button id="themeToggle" title="Alternar Modo Escuro/Claro"
+        class="fixed top-4 right-4 p-3 rounded-full bg-dark-card border border-dark-stroke hover:bg-gray-700 transition duration-200 text-gray-300 dark:text-gray-300 dark:border-gray-700 z-50">
+        <!-- SVG Ícone do Sol (Modo Claro) -->
+        <svg id="sun-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+          </path>
+        </svg>
+        <!-- SVG Ícone da Lua (Modo Escuro) -->
+        <svg id="moon-icon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+        </svg>
+      </button>
+
+    <!-- Seção Principal - CARD MODERN -->
+    <section
+      class="card-modern bg-dark-card/70 dark:bg-dark-card/80 border border-dark-stroke dark:border-gray-700 rounded-2xl p-6 md:p-8 shadow-xl backdrop-blur-sm transition-colors duration-300">
+      <form action="/start_upload" method="post" enctype="multipart/form-data">
+        <!-- Alterado de grid-cols-1 lg:grid-cols-2 para sempre grid-cols-1 -->
+        <div class="grid grid-cols-1 gap-6">
+          <!-- Coluna Esquerda: Texto e Arquivo (Agora é a primeira seção da coluna única) -->
+          <div>
+            <div class="label text-gray-300 dark:text-gray-200 font-semibold mb-2">Texto (cole aqui)</div>
+            <textarea name="pasted_text" placeholder="Cole o texto em português…"
+              class="input-modern w-full h-56 resize-y focus:ring-1"></textarea>
+            <p class="text-sm text-gray-500 mt-2 dark:text-gray-400">Você também pode enviar um arquivo abaixo (.txt,
+              .pdf ou .docx).</p>
+
+            <div class="label text-gray-300 dark:text-gray-200 font-semibold mt-4 mb-2">Arquivo de texto (opcional)
+            </div>
+            <!-- Campo de arquivo estilizado como um input normal, mas com padding e cores adaptativas -->
+            <input class="input-modern w-full block cursor-pointer 
+                            file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold 
+                            file:bg-primary-red/20 file:text-primary-red hover:file:bg-primary-red/30" type="file"
+              name="file" accept=".txt,.pdf,.docx">
+          </div>
+
+          <!-- Coluna Direita: Opções de Imagem (Agora é a segunda seção da coluna única) -->
+          <div>
+            <div class="label text-gray-300 dark:text-gray-200 font-semibold mb-2">Imagens de referência (opcional, até
+              3)</div>
+            <!-- Campos de Imagem de Referência -->
+            <input
+              class="input-modern w-full mb-3 block cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700/50 file:text-gray-300 hover:file:bg-gray-700/70"
+              type="file" name="ref1" accept="image/*">
+            <input
+              class="input-modern w-full mb-3 block cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700/50 file:text-gray-300 hover:file:bg-gray-700/70"
+              type="file" name="ref2" accept="image/*">
+            <input
+              class="input-modern w-full mb-4 block cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700/50 file:text-gray-300 hover:file:bg-gray-700/70"
+              type="file" name="ref3" accept="image/*">
+
+            <!-- Linha de Provedor e Contagem -->
+            <div class="flex gap-4 flex-wrap">
+              <div class="flex-1 min-w-[180px]">
+                <div class="label text-gray-300 dark:text-gray-200 font-semibold mb-2">Provedor</div>
+                <select class="input-modern w-full appearance-none pr-10" name="provider">
+                  <option value="nano" selected>Google (Gemini / Imagen)</option>
+                  <option value="openai">OpenAI (DALL·E)</option>
+                </select>
+              </div>
+
+              <div class="flex-1 min-w-[180px]">
+                <div class="label text-gray-300 dark:text-gray-200 font-semibold mb-2">Número de imagens</div>
+                <input class="input-modern w-full" type="number" name="count" min="1" max="200" value="3">
+              </div>
+            </div>
+
+            <!-- Linha de Tamanho e Customizado/Seed -->
+            <div class="flex gap-4 flex-wrap mt-4">
+              <div class="flex-1 min-w-[180px]">
+                <div class="label text-gray-300 dark:text-gray-200 font-semibold mb-2">Tamanho da imagem</div>
+                <select class="input-modern w-full appearance-none pr-10" name="size">
+                  <option value="1024x1024">1024 × 1024 (quadrado)</option>
+                  <option value="1536x1024">1536 × 1024 (paisagem)</option>
+                  <option value="1024x1536" selected>1024 × 1536 (retrato)</option>
+                  <option value="1792x1024">1792 × 1024 (OpenAI paisagem)</option>
+                  <option value="1024x1792">1024 × 1792 (OpenAI retrato)</option>
+                </select>
+              </div>
+              <div class="flex-1 min-w-[180px]">
+                <div class="label text-gray-300 dark:text-gray-200 font-semibold mb-2">Tamanho customizado</div>
+                <input class="input-modern w-full" type="text" name="size_custom" placeholder="LxA, ex.: 1200x1600">
+              </div>
+              <div class="flex-1 min-w-[180px]">
+                <div class="label text-gray-300 dark:text-gray-200 font-semibold mb-2">Seed (opcional)</div>
+                <input class="input-modern w-full" type="text" name="seed" placeholder="ex.: 42">
+              </div>
+            </div>
+
+            <!-- Checkbox -->
+            <label class="flex items-center gap-2 mt-4 cursor-pointer">
+              <!-- Corrigido para text-primary-red -->
+              <input type="checkbox" name="fallback_openai"
+                class="h-4 w-4 rounded border-gray-500 text-primary-red focus:ring-primary-red dark:bg-gray-700 dark:border-gray-600">
+              <span class="text-sm text-gray-400 dark:text-gray-400">Usar fallback OpenAI se Google falhar</span>
+            </label>
+
+            <!-- Botão de Envio Centralizado -->
+            <div class="mt-8 flex justify-center">
+              <!-- Corrigido para bg-primary-red e hover:bg-red-600 -->
+              <button
+                class="w-full md:w-2/3 btn bg-primary-red text-white font-extrabold py-3 rounded-xl transition duration-300 ease-in-out transform hover:scale-[1.01] hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-primary-red/50 shadow-lg shadow-primary-red/40"
+                type="submit">
+                GERAR IMAGENS
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <p class="text-sm text-gray-500 dark:text-gray-600 text-center mt-6">
+      Desenvolvido por Lígia Futterleib — NEAD/UNL
+    </p>
+  </main>
+
+  <!-- Script de Alternância de Tema -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const themeToggle = document.getElementById('themeToggle');
+      const html = document.documentElement;
+      const moonIcon = document.getElementById('moon-icon');
+      const sunIcon = document.getElementById('sun-icon');
+
+      // Verifica o tema salvo ou usa o padrão 'dark'
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+
+      // Aplica os estilos iniciais
+      if (currentTheme === 'light') {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        moonIcon.classList.add('hidden');
+        sunIcon.classList.remove('hidden');
+      } else {
+        html.classList.add('dark');
+        html.classList.remove('light');
+        moonIcon.classList.remove('hidden');
+        sunIcon.classList.add('hidden');
+      }
+
+      themeToggle.addEventListener('click', () => {
+        if (html.classList.contains('dark')) {
+          // Mudar para Light Mode (Fundo Branco)
+          html.classList.remove('dark');
+          html.classList.add('light'); // Adiciona a classe light para ativar os estilos claros
+          localStorage.setItem('theme', 'light');
+          moonIcon.classList.add('hidden');
+          sunIcon.classList.remove('hidden');
+        } else {
+          // Mudar para Dark Mode (Fundo Escuro/Marinho)
+          html.classList.add('dark');
+          html.classList.remove('light'); // Remove a classe light
+          localStorage.setItem('theme', 'dark');
+          moonIcon.classList.remove('hidden');
+          sunIcon.classList.add('hidden');
+        }
+      });
+    });
+  </script>
+
+</body>
+
+</html>

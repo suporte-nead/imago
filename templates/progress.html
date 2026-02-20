@@ -1,0 +1,1071 @@
+<!doctype html>
+<div id="jobMeta" data-job-id="{{ job_id }}"></div>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Progresso — Imago</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #e53935; /* Vermelho principal */
+            --red-light: #ff6d6a; /* Vermelho mais claro para hover/detalhe */
+            --bg: #0c0c0f; /* Fundo escuro */
+            --card: #14161d; /* Fundo dos cartões (ligeiramente mais claro) */
+            --stroke: #2e313e; /* Borda/separador mais visível e elegante */
+            --text: #e7e7ea; /* Texto principal claro */
+            --muted: #a0a4b0; /* Texto secundário */
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --radius-xl: 20px;
+            --radius-lg: 14px;
+            --radius-md: 10px;
+        }
+
+        /* RESET e Base */
+        body { 
+            margin: 0; 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 960px; /* Aumentei um pouco a largura máxima */
+            margin: 0 auto;
+            padding: 24px 18px; /* Mais padding no topo e base */
+        }
+        h1, h2, h3 { 
+            font-weight: 700; 
+            margin: 0; 
+            letter-spacing: -0.02em; 
+            color: var(--text);
+        }
+        h1 { font-size: 1.8em; }
+
+        /* HEADER */
+        .vheader { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 16px; 
+            margin: 10px auto 28px;
+        }
+        .vheader img {
+            display: block;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,.2));
+        }
+        .seal { max-width: 70px; width: 40%; }
+        .app { max-width: 180px; width: 70%; }
+        .nead { max-width: 75px; width: 60%; }
+        @media (min-width: 820px) {
+            .vheader { flex-direction: row; justify-content: space-between; gap: 24px; }
+            .vheader img { width: auto; max-height: 84px; }
+            .app { max-height: 96px; }
+        }
+
+        /* UTILITÁRIOS */
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .btn {
+            background: var(--red);
+            border: none;
+            border-radius: var(--radius-md);
+            color: #fff;
+            font-weight: 700;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 8px rgba(229, 57, 53, 0.3);
+        }
+        .btn:hover {
+            background: var(--red-light);
+            box-shadow: 0 6px 12px rgba(229, 57, 53, 0.4);
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* BOTÃO VOLTAR PARA INÍCIO (MELHORADO) */
+        .btn-home {
+            background: #2b313c; /* Cor cinza/azul escuro padrão */
+            margin-right: 10px; 
+            color: #e7e7ea; 
+            border: 1px solid #3c4452; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .btn-home:hover {
+            background: #454c59; /* Cor um pouco mais clara no hover */
+            border-color: #454c59;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        /* CARDS e Status */
+        .card {
+            background: linear-gradient(145deg, var(--card), #0e1015);
+            border: 1px solid var(--stroke);
+            border-radius: var(--radius-xl);
+            padding: 20px 24px;
+            margin: 0 0 20px;
+            box-shadow: var(--shadow);
+        }
+        .stats {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .badge {
+            background: #1e2029;
+            border: 1px solid var(--stroke);
+            padding: 8px 14px;
+            border-radius: var(--radius-lg);
+            font-size: 0.9em;
+            color: var(--muted);
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            font-weight: 500;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .badge strong { 
+            color: var(--text); 
+            font-weight: 700; 
+        }
+
+        /* ESTILOS PARA FEEDBACK DE STATUS */
+        .badge.badge-success {
+            background: #004d40; /* Verde escuro */
+            border-color: #00897b; /* Borda verde */
+        }
+        .badge.badge-success strong {
+            color: #b2dfdb; /* Texto verde claro */
+        }
+
+        .badge.badge-error {
+            background: #4e0000; /* Vermelho escuro para erro/cancelado */
+            border-color: #7f0000;
+        }
+        .badge.badge-error strong {
+            color: #ffcdd2;
+        }
+
+        /* BARRA DE PROGRESSO */
+        .progress-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .meter {
+            height: 12px;
+            background: #1a1a20;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #1f2128;
+        }
+        .meter > span {
+            display: block;
+            height: 100%;
+            background: var(--red);
+            width: 0%;
+            transition: width 0.6s ease;
+            box-shadow: 0 0 8px rgba(229, 57, 53, 0.5);
+        }
+        
+        /* ANIMAÇÃO INDETERMINADA */
+        .meter > span.is-animated {
+            background: repeating-linear-gradient(
+                -45deg,
+                #f44336 0%,
+                #f44336 8px,
+                var(--red) 8px,
+                var(--red) 16px
+            );
+            background-size: 32px 100%;
+            animation: progress-bar-stripes 1s linear infinite;
+            width: 100% !important;
+        }
+        @keyframes progress-bar-stripes {
+            from { background-position: 32px 0; }
+            to { background-position: 0 0; }
+        }
+
+        /* LOG BOX */
+        .logbox {
+            white-space: pre-wrap;
+            font: 13px/1.5 ui-monospace, Menlo, Consolas, 'Courier New', monospace;
+            background: #0d0f14;
+            border: 1px solid var(--stroke);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            color: #b9c1d2;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease;
+        }
+        
+        /* ESTADO MINIMIZADO DO LOG */
+        .logbox.minimized {
+            max-height: 5em; 
+            overflow: hidden;
+            opacity: 0.85;
+            padding-bottom: 24px;
+            position: relative;
+        }
+        .logbox.minimized::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2em; 
+            background: linear-gradient(to top, #0d0f14, transparent);
+            pointer-events: none;
+        }
+        
+        /* ESTILO DO BOTÃO DE TOGGLE DO LOG */
+        .log-toggle-btn {
+            background: transparent;
+            border: 1px solid var(--stroke);
+            color: var(--muted);
+            padding: 4px 10px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: background 0.2s, color 0.2s;
+            margin-top: 10px;
+        }
+        .log-toggle-btn:hover {
+            background: #242730;
+            color: var(--text);
+        }
+
+        /* PÁGINAS (RESULTADOS) */
+        .page {
+            background: #181a21;
+            border: 1px solid var(--stroke);
+            border-radius: var(--radius-xl);
+            padding: 20px;
+            margin: 24px 0;
+        }
+        .page h3 {
+            border-bottom: 1px solid #2e313e;
+            padding-bottom: 8px;
+            margin-bottom: 12px !important;
+            font-size: 1.2em;
+        }
+        .page .muted {
+            font-style: italic;
+            color: var(--muted);
+            margin: 4px 0 16px !important;
+            white-space: pre-wrap;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+        }
+        .image-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: var(--card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--stroke);
+            padding: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+        }
+        
+        .thumb {
+            width: 100%;
+            border-radius: 6px;
+            border: 1px solid #222;
+            display: block;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+        
+        /* NOVO: Ajuste para os botões Baixar e Copiar ficarem alinhados e padronizados */
+        .cap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px; /* Ajuste o gap para 8px */
+            color: var(--muted);
+            font-size: 0.9em;
+            padding-top: 4px;
+        }
+        
+        /* Estilos comuns para os botões de Baixar e Copiar */
+        .dl, .btn-copy {
+            border: 1px solid;
+            color: #fff;
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: background 0.2s;
+            
+            /* Padronização de Tamanho: */
+            width: 100px; /* Largura fixa para padronizar */
+            flex-shrink: 0; /* Não permite encolher */
+            text-align: center;
+        }
+
+        /* Estilo específico Baixar */
+        .dl {
+            background: #2b313c;
+            border-color: #454c59;
+            margin-left: auto; /* Mantém o span à esquerda e os botões à direita */
+        }
+        .dl:hover {
+            background: #3c4452;
+        }
+
+        /* Estilo específico Copiar */
+        .btn-copy {
+            background: #324759; 
+            border-color: #4a6d8f;
+            
+        }
+        .btn-copy:hover {
+            background: #4a6d8f;
+        }
+        /* FIM NOVO */
+
+
+        /* ESTILOS DO MODAL E REGENERAÇÃO */
+        /* DIALOG / MODAL (Gerar Novamente) */
+        #imago-regen > div {
+            background: #1d2328;
+            border: 1px solid #3c4452;
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            width: min(580px, 95vw);
+            box-shadow: var(--shadow);
+            transform: translateY(-20px);
+            animation: fadeInModal 0.3s ease-out forwards;
+        }
+        @keyframes fadeInModal {
+            to { transform: translateY(0); opacity: 1; }
+        }
+        #imago-regen label {
+            font-weight: 600;
+            color: var(--text);
+            margin-top: 12px !important;
+            margin-bottom: 6px !important;
+            display: block !important;
+        }
+        #imago-regen input[type="text"], #imago-regen select, #imago-regen textarea {
+            border: 1px solid #3c4452 !important;
+            background: #11141a !important;
+            color: var(--text) !important;
+            padding: 12px !important;
+            border-radius: var(--radius-md) !important;
+            transition: border-color 0.2s;
+        }
+        #imago-regen input:focus, #imago-regen select:focus, #imago-regen textarea:focus {
+            border-color: var(--red) !important;
+            outline: none;
+        }
+        .imago-btn { 
+            background: var(--red); 
+            border: none; 
+            border-radius: var(--radius-md); 
+            padding: 10px 18px; 
+            font-weight: 700; 
+            transition: background 0.2s;
+        }
+        .imago-btn:hover { background: var(--red-light); }
+        
+        /* NOVO: Estilo para o botão "Gerar Novamente" (azul) */
+        .imago-btn.regen {
+            background: #c00; /* Cor vermelho principal */
+            box-shadow: 0 4px 8px rgba(89, 50, 50, 0.4); /* Sombra azul */
+            cursor: pointer;
+            color: #fff;
+            
+        }
+        .imago-btn.regen:hover {
+            background: #4a6d8f; /* Vermelho mais claro no hover */
+            transition: background 0.5s;
+        }
+        /* FIM NOVO */
+        
+        .imago-btn.is-loading { background: #3c4452; pointer-events: none; opacity: 0.8; }
+        #imago-cancel { background: #3c4452 !important; color: #fff; }
+        #imago-cancel:hover { background: #454c59 !important; }
+        #imago-confirm { box-shadow: 0 4px 8px rgba(229, 57, 53, 0.3); }
+
+        /* Estilos Lado a Lado (Regeneração) */
+        .sbs-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        .sbs-container img {
+            border-radius: 6px !important;
+            display: block;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+        .sbs-container .thumb-new {
+            flex: 2;
+            border: 2px solid var(--red) !important;
+        }
+        .sbs-container .thumb-old {
+            flex: 1;
+            border: 1px solid var(--stroke) !important;
+            opacity: 0.6;
+        }
+        /* Estilos de Botão de Galeria Adicionais */
+        .btn-mini { font-size: 13px !important; padding: 8px 14px !important; border-radius: var(--radius-md) !important; }
+        .btn-open-reg {
+            border: 1px solid var(--red, #c00);
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            background: transparent;
+            color: inherit;
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-open-reg:hover { background: #200; }
+        .regen-viewer {
+            margin-top: 15px;
+            border: 1px dashed var(--stroke);
+            padding: 12px;
+            border-radius: var(--radius-lg);
+        }
+        .regen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+        }
+        .regen-grid img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .bg-gradient-modern {
+          background-color: #0c0c0f;
+          /* Gradiente VERMELHO sutil no topo no Dark Mode */
+          background-image: radial-gradient(circle at 50% 10%, rgba(229, 57, 53, 0.1), transparent 50%),
+            radial-gradient(1200px 600px at 50% -10%, #17171c, transparent);
+          transition: background-color 0.5s;
+        }
+    </style>
+
+</head>
+<body class="bg-gradient-modern">
+    <main class="container">
+        <div class="vheader">
+            <img class="seal max-h-12" src="/static/UNL.png" alt="Universidade Nilton Lins">
+            <img class="app max-h-14" src="/static/IMAGONEW.png" alt="IMAGO — Ilustração Mágica de Textos">
+            <img class="nead max-h-12" src="/static/NEAD.png" alt="NEAD Premium">
+        </div>
+
+        <div class="row">
+            <a id="btnHome" href="/" class="btn btn-home" style="display:none;">Voltar para Início</a>
+            <button id="btnStop" class="btn">Parar processamento</button>
+        </div>
+
+        <section class="card">
+          <h1>Progresso do Job</h1> <br>
+            <div class="stats">
+                <div class="badge">Status: <strong id="st">—</strong></div>
+                <div class="badge">Progresso: <strong><span id="cur">0</span>/<span id="tot">0</span></strong></div>
+                <div class="badge">Tempo: <strong id="elapsed">00:00</strong></div>
+                <div class="badge">ETA: <strong id="eta">—</strong></div>
+            </div>
+            <div class="progress-section">
+                <div class="meter"><span id="bar"></span></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 style="margin:0 0 10px; font-size: 1.4em;">📦 Log de Processamento</h2>
+            <pre id="log" class="logbox minimized">Aguardando início do processamento...</pre>
+            <div style="text-align: right;">
+                <button id="toggleLogBtn" class="log-toggle-btn">Mostrar Log Completo</button>
+            </div>
+        </section>
+
+        <section id="pages">
+            </section>
+    </main>
+
+    <script>
+        const jobId = location.pathname.split('/').pop();
+        let poller=null;
+
+        function fmt(sec){ if(sec==null) return '—'; sec=Math.max(0,Math.floor(sec));
+            const m=String(Math.floor(sec/60)).padStart(2,'0'), s=String(sec%60).padStart(2,'0'); return `${m}:${s}`;}
+
+        // === Lógica de Toggle do Log ===
+        const logEl = document.getElementById('log');
+        const toggleBtn = document.getElementById('toggleLogBtn');
+        let isLogMinimized = true;
+
+        function toggleLog() {
+            if (isLogMinimized) {
+                logEl.classList.remove('minimized');
+                // Usa scrollHeight para expandir para o tamanho total
+                logEl.style.maxHeight = logEl.scrollHeight + 'px'; 
+                toggleBtn.textContent = 'Ocultar Log';
+            } else {
+                // Define a altura mínima do CSS
+                logEl.style.maxHeight = '5em'; 
+                // Espera a animação recolher antes de aplicar a classe de overflow/fade
+                setTimeout(() => {
+                     logEl.classList.add('minimized');
+                }, 300);
+                toggleBtn.textContent = 'Mostrar Log Completo';
+            }
+            isLogMinimized = !isLogMinimized;
+        }
+
+        toggleBtn.addEventListener('click', toggleLog);
+        
+        // Salva a função original (antes de sobreescrever)
+        const originalFetchStatus = async () => {
+            let res;
+            try{ res = await fetch(`/status/${jobId}`, {cache:'no-store'});}catch(e){return;}
+            if(res.status===404){ if(poller) clearInterval(poller); return; }
+            if(!res.ok) return;
+            const data = await res.json();
+
+            const statusText = data.status||'—';
+            const statusBadge = document.querySelector('.badge:first-child');
+            const done = ['concluido','erro','cancelado'].includes(statusText.toLowerCase());
+
+            // 1. Lógica do Status (Cor e Texto)
+            st.textContent = statusText;
+            statusBadge.classList.remove('badge-success', 'badge-error');
+            
+            if (statusText.toLowerCase() === 'concluido') {
+                statusBadge.classList.add('badge-success');
+            } else if (['erro', 'cancelado'].includes(statusText.toLowerCase())) {
+                statusBadge.classList.add('badge-error');
+            }
+
+            // header
+            cur.textContent = data.current??0; tot.textContent = data.total??0;
+            elapsed.textContent = fmt(data.elapsed_sec);
+            eta.textContent = data.eta_sec?fmt(data.eta_sec):'—';
+            
+            const bar = document.getElementById('bar');
+            
+            // Lógica de animação indeterminada (JS)
+            bar.classList.remove('is-animated'); 
+            
+            if (!done && data.total === 0) { // Assume animação se não houver total (progresso indeterminado)
+                bar.classList.add('is-animated');
+                bar.style.width = '100%';
+            } else if (!done && data.total > 0) {
+                 // Calcula progresso se houver total
+                const progress = (data.current / data.total) * 100;
+                bar.style.width = progress + '%';
+            }
+            else { // Concluído/Erro/Cancelado
+                bar.style.width = '100%';
+            }
+
+            // log
+            log.textContent = (data.log||[]).join('\n');
+
+            // pages (restante do código de pages...)
+            const cont = document.getElementById('pages');
+            
+            cont.innerHTML='';
+            (data.pages||[]).forEach((p,idx)=>{
+                const div=document.createElement('div'); div.className='page';
+
+                // 2 linhas do texto
+                const full=(p.paragraph||'').trim();
+                let sn=full.slice(0,160); const sidx=sn.lastIndexOf(' '); if(sidx>120) sn=sn.slice(0,sidx);
+                sn=sn.replace(/\s+/g,' '); const two = sn.replace(/(.{0,80})(\s|$)/,"$1\n").replace("\n\n","\n");
+
+                const metas = (p.image_meta && p.image_meta.length) ? p.image_meta : (p.images||[]).map(src=>({src,w:null,h:null}));
+
+                const thumbs = metas.map((m,i)=>`
+                    <div class="image-item" data-paragraph-idx="${idx}">
+                        <img class="thumb imago-thumb" src="${m.src}" alt="Imagem do Parágrafo ${idx+1}">
+                        <div class="cap">
+                            <span>${(m.w&&m.h)?`${m.w} × ${m.h} px`:''}</span>
+                            <button class="dl" data-src="${m.src}" data-suggest="img_${idx+1}_${i+1}.png">Baixar</button>
+                            <button class="btn-copy" data-src="${m.src}">Copiar 📋</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                div.innerHTML = `
+                    <h3>🖼️ Parágrafo ${idx+1}</h3>
+                    <div class="muted">${two}</div>
+                    <div class="grid">${thumbs}</div>`;
+                cont.appendChild(div);
+            });
+            
+            if (window.__imagoRebuild) window.__imagoRebuild();
+
+            // download com renomear
+            document.querySelectorAll('.dl').forEach(btn=>{
+                btn.onclick = async ()=>{
+                    const src = btn.getAttribute('data-src');
+                    const suggest = btn.getAttribute('data-suggest');
+                    const name = prompt('Nome do arquivo (com .png):', suggest) || suggest;
+                    if (!name || name.trim() === '') return;
+                    try{
+                        const r = await fetch(src);
+                        const blob = await r.blob();
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = name;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        setTimeout(()=>URL.revokeObjectURL(a.href), 1200);
+                    }catch(e){
+                        alert('Erro ao tentar baixar o arquivo.');
+                    }
+                };
+            });
+            
+            // NOVO: Copiar Imagem para o Clipboard
+            document.querySelectorAll('.btn-copy').forEach(btn=>{
+                btn.onclick = async ()=>{
+                    const src = btn.getAttribute('data-src');
+                    
+                    if (!navigator.clipboard || !window.fetch) {
+                        alert('Seu navegador não suporta a cópia direta de imagens para a área de transferência.');
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    const oldText = btn.textContent;
+                    btn.textContent = 'Copiando...';
+
+                    try{
+                        const r = await fetch(src);
+                        const blob = await r.blob();
+                        
+                        // Cria o item para o clipboard
+                        const item = new ClipboardItem({'image/png': blob});
+                        await navigator.clipboard.write([item]);
+
+                        btn.textContent = 'Copiado! ✅';
+                        setTimeout(() => { btn.textContent = oldText; btn.disabled = false; }, 1500);
+
+                    }catch(e){
+                        console.error('Erro ao copiar imagem:', e);
+                        alert('Falha ao copiar a imagem. Verifique se o navegador tem permissão.');
+                        btn.textContent = oldText; 
+                        btn.disabled = false;
+                    }
+                };
+            });
+
+
+            // 2. Lógica de visibilidade dos botões
+            document.getElementById('btnStop').style.display = done ? 'none' : 'inline-block';
+            document.getElementById('btnHome').style.display = done ? 'inline-block' : 'none';
+        };
+        
+        // Sobreescreve fetchStatus para incluir a lógica de auto-expansão do log
+        window.fetchStatus = async () => {
+            await originalFetchStatus();
+            if (!isLogMinimized) {
+                // Reajusta a altura máxima para acomodar o novo conteúdo se estiver expandido
+                logEl.style.maxHeight = logEl.scrollHeight + 'px';
+            }
+        };
+
+        async function stopJob(){
+            if(!confirm('Tem certeza que deseja parar este processamento?')) return;
+            const b = document.getElementById('btnStop'); b.disabled = true;
+            try{ await fetch(`/cancel/${jobId}`, {method:'POST'});}catch(e){}
+            setTimeout(window.fetchStatus, 400);
+        }
+        document.getElementById('btnStop').addEventListener('click', stopJob);
+
+        window.fetchStatus();
+        poller=setInterval(window.fetchStatus, 1200);
+        setTimeout(()=>{clearInterval(poller); poller=setInterval(window.fetchStatus, 2500);}, 60000);
+    </script>
+
+    <div id="imago-regen" style="display:none;position:fixed;inset:0;background:#0009;z-index:9999;align-items:center;justify-content:center">
+        <div>
+            <h2>🔄 Gerar novamente</h2>
+            <p style="margin:0 0 16px;opacity:.8">Redefina o tamanho e descreva uma mudança (opcional), ou deixe a IA decidir.</p>
+            
+            <label for="imago-size-preset">Redefinir tamanho</label>
+            <select id="imago-size-preset" style="width:100%">
+                <option value="">Manter tamanho atual</option>
+                <option value="1024x1024">1024 × 1024</option>
+                <option value="1280x720">1280 × 720</option>
+                <option value="1536x1024">1536 × 1024</option>
+                <option value="1920x1080">1920 × 1080</option>
+            </select>
+            
+            <label for="imago-size-custom">Tamanho personalizado (LxA, ex.: 1536x1024)</label>
+            <input id="imago-size-custom" type="text" placeholder="ex.: 1536x1024" style="width:100%">
+            
+            <label for="imago-edit-text">O que deseja mudar na imagem? (opcional)</label>
+            <textarea id="imago-edit-text" rows="3" placeholder="ex.: substituir os dois homens por duas mulheres" style="width:100%"></textarea>
+            
+            <div style="display:flex;gap:10px;align-items:center;margin-top:12px">
+                <input id="imago-free-variation" type="checkbox"><label for="imago-free-variation" style="margin:0;font-weight:400;display:inline">Deixar por conta da IA (variação livre)</label>
+            </div>
+            
+            <div id="regenModalActionsContainer">
+                </div>
+            
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+                <button id="imago-cancel" class="imago-btn">Cancelar</button>
+                <button id="imago-confirm" class="imago-btn">Gerar</button>
+            </div>
+        </div>
+    </div>
+
+    <script id="imago-dialog-js">
+    (function(){
+        function getJobId(){
+            var m = document.getElementById('jobMeta');
+            var jid = (m && m.dataset && m.dataset.jobId) ? m.dataset.jobId : '';
+            if(!jid){
+                try{ var mm = location.pathname.match(/\/progress\/([A-Za-z0-9\-]+)/); jid = mm?mm[1]:''; }catch(e){}
+            }
+            return jid;
+        }
+        function findCards(){
+            var list = Array.prototype.slice.call(document.querySelectorAll('.image-item'));
+            return list.filter(function(c){ return c.querySelector('img'); });
+        }
+        function ensureButton(card, idx){
+            if(card.querySelector('.imago-btn.regen')) return;
+            var actions = card.querySelector('.cap') || card; 
+            var btn = document.createElement('button');
+            btn.className = 'imago-btn regen';
+            btn.textContent = '🔄 Gerar novamente';
+            btn.dataset.idx = idx;
+            actions.appendChild(btn);
+            if(card.querySelector('.dl')) {
+                // Removido o ml-auto daqui para o CSS gerenciar
+            }
+        }
+        function ensureThumb(card){
+            var img = card.querySelector('img');
+            if(img && !img.classList.contains('imago-thumb')) {
+                img.classList.add('imago-thumb');
+            }
+        }
+        function ensureCaption(card){
+            var cap = card.querySelector('.cap span');
+            if(!cap){
+                var host = card.querySelector('.meta') || card;
+                var wrap = document.createElement('div'); wrap.className='cap'; wrap.style.opacity='.8';
+                var span = document.createElement('span'); wrap.appendChild(span);
+                host.insertBefore(wrap, host.querySelector('.dl') ? wrap.querySelector('.dl') : null);
+                cap = span;
+            }
+            return cap;
+        }
+        function setBusy(card, busy){
+            if(!card) return;
+            if(busy){
+                card.classList.add('imago-card-busy');
+                if(!card.querySelector('.imago-overlay')){
+                    var o = document.createElement('div');
+                    o.className='imago-overlay';
+                    o.innerHTML='<div class="imago-spinner"></div>';
+                    card.appendChild(o);
+                }
+            }else{
+                card.classList.remove('imago-card-busy');
+                var o = card.querySelector('.imago-overlay'); if(o) o.remove();
+            }
+        }
+        function build(){
+            var cards = findCards();
+            cards.forEach(function(card, idx){
+                ensureThumb(card);
+                ensureCaption(card);
+                ensureButton(card, card.dataset.paragraphIdx || idx);
+            });
+        }
+
+        // Modal control
+        function openModal(ctx){
+            window.__imagoCtx = ctx;
+            document.getElementById('imago-regen').style.display='flex';
+            // Chama a montagem dos botões de galeria
+            setTimeout(mountButtonInsideModal, 50); 
+        }
+        function closeModal(){
+            document.getElementById('imago-regen').style.display='none';
+            ['imago-size-custom','imago-edit-text'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+            document.getElementById('imago-size-preset').value='';
+            document.getElementById('imago-free-variation').checked=false;
+        }
+
+        document.addEventListener('click', function(ev){
+            var btn = ev.target.closest && ev.target.closest('.regen');
+            if(!btn) return;
+            var jid = getJobId(); if(!jid){ alert('Job não encontrado.'); return; }
+            
+            var card = btn.closest('.image-item'); 
+            var idx = (card && card.dataset.paragraphIdx) || btn.dataset.idx || '0'; 
+            openModal({jobId:jid, idx:idx, card:card});
+        });
+
+        document.getElementById('imago-cancel').addEventListener('click', closeModal);
+        document.addEventListener('click', function(e){
+            var modal = document.getElementById('imago-regen');
+            if(modal && modal.style.display==='flex' && e.target===modal){ closeModal(); }
+        });
+
+        // LÓGICA DE CONFIRMAÇÃO ATUALIZADA (Lado a Lado)
+        document.getElementById('imago-confirm').addEventListener('click', async function(){
+            var preset = document.getElementById('imago-size-preset').value || '';
+            var custom = document.getElementById('imago-size-custom').value || '';
+            var edit   = document.getElementById('imago-edit-text').value || '';
+            var free   = !!document.getElementById('imago-free-variation').checked;
+            var size = (custom.trim() || preset.trim());
+            if(size && !/^\d{2,5}x\d{2,5}$/i.test(size)){ alert('Tamanho inválido. Use LxA, ex.: 1536x1024'); return; }
+
+            var ctx = window.__imagoCtx || {};
+            var jid = ctx.jobId, idx = ctx.idx, card = ctx.card;
+            if(!jid || card==null){ alert('Contexto inválido.'); return; }
+
+            var confirmBtn = document.getElementById('imago-confirm');
+            var old = confirmBtn.textContent; confirmBtn.textContent='Gerando...'; confirmBtn.disabled=true; confirmBtn.classList.add('is-loading');
+            setBusy(card, true);
+
+            try{
+                var activeImg = card.querySelector('.imago-thumb:not(.thumb-old)');
+                var oldSrc = activeImg ? activeImg.src : (card.querySelector('img') ? card.querySelector('img').src : '');
+
+                var resp = await fetch('/regenerate?job_id='+encodeURIComponent(jid)+'&paragraph_idx='+idx, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        edit: edit, 
+                        size: size, 
+                        free: free,
+                        original_src: oldSrc 
+                    })
+                });
+                var data = await resp.json();
+                
+                // Lógica de exibição Lado a Lado
+                if(data && data.src){
+                    var cap = card.querySelector('.cap');
+                    
+                    var activeImg = card.querySelector('.imago-thumb:not(.thumb-old)');
+
+                    var oldContainer = card.querySelector('.sbs-container');
+                    if (oldContainer) oldContainer.remove();
+                    
+                    if (activeImg) activeImg.remove();
+
+                    var sbsContainer = document.createElement('div');
+                    sbsContainer.className = 'sbs-container';
+                    
+                    sbsContainer.innerHTML = `
+                        <img class="thumb-old imago-thumb" src="${oldSrc}" alt="Imagem Original">
+                        <img class="thumb-new imago-thumb" src="${data.src + '?t=' + Date.now()}" alt="Nova Imagem Gerada">
+                    `;
+                    
+                    card.insertBefore(sbsContainer, cap);
+
+                    var capSpan = cap.querySelector('span');
+                    if(capSpan && data.w && data.h) capSpan.textContent = `Novo: ${data.w} × ${data.h} px`;
+                    
+                    var dlBtn = cap.querySelector('.dl');
+                    var copyBtn = cap.querySelector('.btn-copy');
+
+                    if(dlBtn) {
+                        dlBtn.dataset.src = data.src;
+                        var oldSuggest = (dlBtn.dataset.suggest || 'img.png').replace('.png', '');
+                        var vMatch = oldSuggest.match(/_v(\d+)$/);
+                        if(vMatch) {
+                            var nextV = parseInt(vMatch[1], 10) + 1;
+                            oldSuggest = oldSuggest.replace(/_v(\d+)$/, '');
+                            dlBtn.dataset.suggest = `${oldSuggest}_v${nextV}.png`;
+                        } else {
+                            dlBtn.dataset.suggest = `${oldSuggest}_v2.png`;
+                        }
+                    }
+                    if(copyBtn) copyBtn.dataset.src = data.src;
+                    
+                    closeModal();
+                }else{
+                    alert('Não foi possível gerar novamente: ' + (data.error || 'Erro desconhecido'));
+                }
+            }catch(err){
+                alert('Erro na regeneração: ' + err);
+            }finally{
+                setBusy(card, false);
+                confirmBtn.textContent = old; confirmBtn.disabled=false; confirmBtn.classList.remove('is-loading');
+            }
+        });
+
+        window.applyStopVisibility = function(done){
+            var b = document.getElementById('btnStop'); if(b){ b.disabled = done; b.style.display = done ? 'none' : 'inline-block'; }
+        };
+
+        if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', build); }
+        else { build(); }
+        window.__imagoRebuild = build;
+    })();
+    </script>
+    
+    <script>
+    (function(){
+        function inferJobId(){
+            if (window.JOB_ID) return window.JOB_ID;
+            if (window.jobId) return window.jobId;
+            const el = document.querySelector('[data-job-id]');
+            if (el) return el.getAttribute('data-job-id');
+            const m = location.pathname.match(/\/progress\/(\w[\w-]+)/);
+            if (m) return m[1];
+            const q = new URLSearchParams(location.search).get("job_id");
+            if (q) return q;
+            return null;
+        }
+        
+        // Função que adiciona o botão "Exibir Imagens Regeradas"
+        function addGalleryButton(){
+            const job = inferJobId();
+            const host = document.querySelector('.row');
+            if (!host) return;
+            const btnLink = document.createElement('a');
+            btnLink.textContent = 'Exibir Imagens Regeradas';
+            btnLink.className = 'btn btn-mini';
+            btnLink.style.marginLeft = 'auto';
+            // URL ATUALIZADA: Aponta para /results
+            btnLink.target = '_blank';
+            btnLink.href = job ? ('/results?job_id=' + encodeURIComponent(job)) : 'javascript:void(0)';
+            if (!job) btnLink.addEventListener('click', () => alert('Não foi possível identificar o job_id desta página.'));
+            
+            // Tenta inserir o botão antes do botão 'Cancelar' (se existir)
+            const btnStop = document.getElementById('btnStop');
+            host.insertBefore(btnLink, btnStop);
+        }
+        
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addGalleryButton);
+        else addGalleryButton();
+        
+        
+       
+    })();
+    </script>
+
+    <script>
+    (function(){
+        function inferJobId(){
+            if (window.JOB_ID) return window.JOB_ID;
+            if (window.jobId) return window.jobId;
+            const el = document.querySelector('[data-job-id]'); if (el) return el.getAttribute('data-job-id');
+            const m = location.pathname.match(/\/progress\/(\w[\w-]+)/); if (m) return m[1];
+            const q = new URLSearchParams(location.search).get('job_id'); if (q) return q;
+            return null;
+        }
+        async function loadRegenerated(into){
+            const jid = inferJobId(); if (!jid) { into.innerHTML = '<p style="color:var(--muted)">job_id não identificado.</p>'; return; }
+            into.innerHTML = '<p style="color:var(--muted)">Carregando imagens regeradas...</p>';
+            try{
+                const r = await fetch('/regenerated_json?job_id='+encodeURIComponent(jid), {cache:'no-store'});
+                const data = await r.json();
+                const list = data.items || [];
+                if (!list.length){ into.innerHTML = '<p style="color:var(--muted)">Nenhuma imagem regerada para este job.</p>'; return; }
+                const grid = document.createElement('div'); grid.className='regen-grid';
+                list.forEach(it=>{
+                    const a = document.createElement('a'); a.href = it.src; a.target = '_blank';
+                    const img = document.createElement('img'); img.src = it.src; img.alt = 'Imagem Regenerada';
+                    a.appendChild(img); grid.appendChild(a);
+                });
+                into.innerHTML = ''; into.appendChild(grid);
+            }catch(e){ into.innerHTML = '<p style="color:var(--red)">Falha ao carregar a lista de imagens.</p>'; }
+        }
+        function mountButtonInsideModal(){
+            const modal = document.querySelector('#imago-regen > div');
+            if (!modal) return;
+            
+            const containerHost = document.getElementById('regenModalActionsContainer');
+            if (!containerHost) return;
+
+            // Remove o conteúdo antigo (se houver)
+            containerHost.innerHTML = '';
+
+            // Cria o container
+            const container = document.createElement('div');
+            container.style.marginTop = '20px';
+            container.style.borderTop = '1px solid #3c4452';
+            container.style.paddingTop = '15px';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+
+            const buttonRow = document.createElement('div');
+            buttonRow.style.marginBottom = '10px';
+
+            const btn = document.createElement('button'); btn.type='button'; btn.className='btn-open-reg'; btn.textContent='Abrir Galeria (Nova Aba)';
+            btn.addEventListener('click', ()=>{
+                const jid = inferJobId(); window.open('/regenerated?job_id=' + encodeURIComponent(jid || ''), '_blank');
+            });
+            const refresh = document.createElement('button'); refresh.type='button'; refresh.className='btn-open-reg'; refresh.textContent='Atualizar lista (aqui)';
+            const viewer = document.createElement('div'); viewer.className='regen-viewer'; viewer.innerHTML='<p style="color:var(--muted)">Clique em "Atualizar lista" para ver as versões.</p>';
+            refresh.addEventListener('click', ()=> loadRegenerated(viewer));
+
+            buttonRow.appendChild(btn); 
+            buttonRow.appendChild(refresh);
+            container.appendChild(buttonRow);
+            container.appendChild(viewer);
+
+            containerHost.appendChild(container);
+        }
+        
+        // Hook de fetch para abrir a galeria após regenerar
+        (function hookFetch(){
+            const _f = window.fetch;
+            window.fetch = function(input, init){
+                const url = (typeof input==='string')?input:(input&&input.url)||'';
+                const isRegen = /\/regenerate(\?|$)/.test(url);
+                const p = _f.apply(this, arguments);
+                if (!isRegen) return p;
+                return p.then(async resp => {
+                    try{
+                        const d = await resp.clone().json();
+                        if (d && d.src){
+                            const mv = document.querySelector('.regen-viewer'); if (mv) loadRegenerated(mv);
+                        }
+                    }catch(e){}
+                    return resp;
+                });
+            };
+        })();
+
+        // Executa a montagem no clique (já garantido no script imago-dialog-js)
+    })();
+    </script>
+
+</body>
+</html>
