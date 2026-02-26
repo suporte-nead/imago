@@ -1087,18 +1087,31 @@ def regenerated_json():
                 "prompt": m.get("prompt")
             })
     if not items:
-        static_root = app.static_folder if hasattr(app, "static_folder") and app.static_folder else os.path.join(app.root_path, "static")
-        alt_root = os.path.join(app.root_path, "statics")
-        candidates = []
-        for root in [static_root, alt_root]:
-            if not root: continue
-            d1 = os.path.join(root, "generated", job_id)
-            if os.path.isdir(d1):
-                import glob
-                candidates.extend(sorted(glob.glob(os.path.join(d1, "*.*"))))
-        for idx, fpath in enumerate(candidates, start=1):
-            url = static_url_with_buster(fpath)
-            items.append({"page_index": 0, "version": idx, "src": url, "w": None, "h": None, "prompt": None})
+        # Tenta localizar a pasta static corretamente
+        static_root = app.static_folder or os.path.join(app.root_path, "static")
+        target_dir = os.path.join(static_root, "generated", job_id)
+        
+        if os.path.isdir(target_dir):
+            import glob
+            # Pega extensões comuns de imagem
+            files = []
+            for ext in ('*.png', '*.jpg', '*.jpeg', '*.webp'):
+                files.extend(glob.glob(os.path.join(target_dir, ext)))
+            
+            for idx, fpath in enumerate(sorted(files), start=1):
+                # Transforma o caminho do sistema operacional em URL acessível pelo navegador
+                rel_path = os.path.relpath(fpath, static_root).replace("\\", "/")
+                url = f"/static/{rel_path}"
+                
+                items.append({
+                    "page_index": 0, 
+                    "version": idx, 
+                    "src": url, 
+                    "w": 1024, # Valor padrão para não quebrar o layout
+                    "h": 1024, 
+                    "prompt": "Imagem recuperada do servidor"
+                })
+    
     return jsonify({"job_id": job_id, "items": items})
 
 
