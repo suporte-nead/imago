@@ -908,35 +908,16 @@ def results():
 @app.route("/regenerated_json") # Use @app.route para garantir que o Flask registre
 def regenerated_json():
     items = []
-    try:
-        # Localiza a pasta static/generated
-        static_root = app.static_folder or os.path.join(app.root_path, "static")
-        generated_base = os.path.join(static_root, "generated")
-
-        if os.path.exists(generated_base):
-            # Varre todas as subpastas de forma recursiva
-            for root, dirs, files in os.walk(generated_base):
-                for file in files:
-                    if file.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
-                        full_path = os.path.join(root, file)
-                        # Transforma o caminho do disco em URL (/static/generated/...)
-                        rel_path = os.path.relpath(full_path, static_root).replace("\\", "/")
-                        url = f"/static/{rel_path}"
-                        
-                        items.append({
-                            "src": url,
-                            "w": 1024,
-                            "h": 1024,
-                            "prompt": f"Arquivo: {file}"
-                        })
-        
-        # Inverte para mostrar as mais recentes primeiro
-        items.reverse()
-        return jsonify({"items": items})
-    
-    except Exception as e:
-        print(f"Erro na busca global: {e}")
-        return jsonify({"items": [], "error": str(e)}), 500
+    static_root = os.path.join(app.root_path, "static")
+    gen_path = os.path.join(static_root, "generated")
+    if os.path.exists(gen_path):
+        for root, dirs, files in os.walk(gen_path):
+            for f in files:
+                if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                    rel = os.path.relpath(os.path.join(root, f), static_root).replace("\\","/")
+                    items.append({"src": f"/static/{rel}", "prompt": f})
+    items.reverse() # Mais recentes primeiro
+    return jsonify({"items": items})
 
 
 # Esta rota decide qual página abrir quando você clica no botão

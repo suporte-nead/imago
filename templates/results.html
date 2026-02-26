@@ -175,6 +175,86 @@
           background-image: radial-gradient(circle at 50% 10%, rgba(229, 57, 53, 0.1), transparent 50%),
             radial-gradient(1200px 600px at 50% -10%, #17171c, transparent);
         }
+
+        /* Container da Galeria */
+#imageGallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 20px 0;
+}
+
+/* O Card da Imagem */
+.image-card {
+    background: var(--card);
+    border: 1px solid var(--stroke);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Efeito ao passar o mouse */
+.image-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--red);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+}
+
+.image-card img {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Mantém as imagens sempre quadradas e alinhadas */
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.image-card:hover img {
+    transform: scale(1.05); /* Zoom suave na imagem */
+}
+
+/* Legenda e Ações */
+.image-caption {
+    padding: 16px;
+    background: linear-gradient(to top, var(--card) 80%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.image-caption span {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 500;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Corta o texto se for muito longo */
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Botão de Download Estilizado */
+.btn-download {
+    width: 100%;
+    padding: 10px;
+    background: rgba(229, 57, 53, 0.1); /* Vermelho bem suave */
+    color: var(--red);
+    border: 1px solid var(--red);
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.btn-download:hover {
+    background: var(--red);
+    color: white;
+}
+
     </style>
 </head>
 <body class="bg-gradient-modern">
@@ -219,96 +299,108 @@
             return `regenerada_${idx+1}.png`;
         }
 
-        async function loadGallery(){
-            const jid = inferJobId();
-            const galleryEl = document.getElementById('imageGallery');
-            const loadingEl = document.getElementById('loading');
-            const noResultsEl = document.getElementById('noResults');
-            const jobIdDisplay = document.getElementById('jobIdDisplay');
-            const btnBack = document.getElementById('btnBack');
+        // Variáveis Globais de Controle
+    let allImages = []; 
+    let currentIndex = 0; 
+    const itemsPerPage = 9;
 
-            galleryEl.innerHTML = '';
-            loadingEl.style.display = 'block';
-            noResultsEl.style.display = 'none';
-            jobIdDisplay.textContent = jid || 'N/A';
+        // Função principal de carga
+    async function loadGallery() {
+        // Declaração interna das variáveis para evitar o erro ReferenceError
+        const galleryEl = document.getElementById('imageGallery');
+        const loadingEl = document.getElementById('loading');
+        const noResultsEl = document.getElementById('noResults');
+
+        try {
+            if (loadingEl) loadingEl.style.display = 'block';
+
+            // Busca o histórico global no servidor
+            const r = await fetch('/regenerated_json', { cache: 'no-store' });
+            if (!r.ok) throw new Error("Erro ao buscar dados do servidor");
             
-            if (jid) {
-                // Atualiza o link de volta para a página de progresso correta
-                btnBack.href = '/progress/' + encodeURIComponent(jid);
-            } else {
-                 btnBack.href = '/';
-                 btnBack.textContent = '↩ Voltar para o Início';
-            }
+            const data = await r.json();
+            allImages = data.items || [];
 
+            if (loadingEl) loadingEl.style.display = 'none';
 
-            if (!jid) {
-                loadingEl.style.display = 'none';
-                noResultsEl.querySelector('p').textContent = 'job_id não especificado na URL.';
-                noResultsEl.style.display = 'block';
+            if (allImages.length === 0) {
+                if (noResultsEl) noResultsEl.style.display = 'block';
                 return;
             }
 
-            try{
-                // A rota de JSON continua a mesma
-                const r = await fetch('/regenerated_json?job_id='+encodeURIComponent(jid), {cache:'no-store'});
-                const data = await r.json();
-                const list = data.items || [];
-                
-                loadingEl.style.display = 'none';
+            // Limpa a galeria e renderiza o primeiro bloco de 9
+            galleryEl.innerHTML = '';
+            currentIndex = 0;
+            renderNextBatch();
 
-                if (!list.length){
-                    noResultsEl.style.display = 'block';
-                    return;
-                }
-                
-                list.forEach((it, idx)=>{
-                    const card = document.createElement('div'); card.className='image-item';
-                    
-                    const imgLink = document.createElement('a');
-                    imgLink.href = it.src; imgLink.target = '_blank';
-                    
-                    const img = document.createElement('img');
-                    img.className = 'thumb'; img.src = it.src; img.alt = 'Imagem Regenerada';
-                    
-                    imgLink.appendChild(img);
-                    
-                    const cap = document.createElement('div'); cap.className='cap';
-                    
-                    const metaSpan = document.createElement('span');
-                    metaSpan.textContent = it.w && it.h ? `${it.w} × ${it.h} px` : `Versão ${idx + 1}`;
-                    
-                    const dlBtn = document.createElement('button'); dlBtn.className='dl'; dlBtn.textContent='Baixar';
-                    dlBtn.onclick = async ()=>{
-                        const suggestName = getDownloadName(it.src, idx);
-                        const name = prompt('Nome do arquivo (com .png):', suggestName) || suggestName;
-                        if (!name || name.trim() === '') return;
-                        try{
-                            // Usa a rota de download do Flask para garantir o nome correto
-                            const finalDownloadUrl = `/download_file?src=${encodeURIComponent(it.src)}&name=${encodeURIComponent(name)}`;
-                            window.location.href = finalDownloadUrl;
-
-                        }catch(e){
-                            alert('Erro ao tentar baixar o arquivo.');
-                        }
-                    };
-
-                    cap.appendChild(metaSpan);
-                    cap.appendChild(dlBtn);
-                    card.appendChild(imgLink);
-                    card.appendChild(cap);
-                    galleryEl.appendChild(card);
-                });
-
-            }catch(e){
-                loadingEl.style.display = 'none';
-                noResultsEl.querySelector('p').textContent = 'Falha ao carregar a lista de imagens.';
+        } catch (e) {
+            console.error("Erro na carga:", e);
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (noResultsEl) {
                 noResultsEl.style.display = 'block';
-                console.error(e);
+                noResultsEl.querySelector('p').textContent = 'Erro técnico ao carregar histórico.';
             }
         }
+    }
+
+    // Função para renderizar blocos de 9
+    function renderNextBatch() {
+        const galleryEl = document.getElementById('imageGallery');
+        const nextBatch = allImages.slice(currentIndex, currentIndex + itemsPerPage);
         
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadGallery);
-        else loadGallery();
+        nextBatch.forEach((it, idx) => {
+            const card = document.createElement('div');
+            card.className = 'image-card';
+            card.innerHTML = `
+                <a href="${it.src}" target="_blank">
+                    <img src="${it.src}" loading="lazy" alt="Imago">
+                </a>
+                <div class="image-caption">
+                    
+                    <button class="btn-download" onclick="downloadImage('${it.src}', ${currentIndex + idx})">Baixar</button>
+                </div>
+            `;
+            galleryEl.appendChild(card);
+        });
+
+        currentIndex += itemsPerPage;
+        manageLoadMoreButton();
+    }
+
+    // Gerencia a exibição do botão Ver Mais
+    function manageLoadMoreButton() {
+        let btn = document.getElementById('loadMoreBtn');
+        
+        if (currentIndex < allImages.length) {
+            if (!btn) {
+                btn = document.createElement('button');
+                btn.id = 'loadMoreBtn';
+                btn.textContent = 'Ver Mais +';
+                // Estilo direto para garantir que apareça corretamente
+                btn.style.cssText = "display:block; margin:30px auto; padding:12px 30px; background:#e53935; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; transition: 0.3s;";
+                btn.onmouseover = () => btn.style.background = '#ff6d6a';
+                btn.onmouseout = () => btn.style.background = '#e53935';
+                btn.onclick = renderNextBatch;
+                document.querySelector('.container').appendChild(btn);
+            }
+        } else {
+            if (btn) btn.remove();
+        }
+    }
+
+    // Função de Download
+    function downloadImage(src, index) {
+    const link = document.createElement('a');
+    link.href = src;
+    // O atributo 'download' tenta forçar o download em vez de abrir
+    link.download = `imago_img_${index + 1}.png`; 
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+    // Inicialização segura
+    document.addEventListener('DOMContentLoaded', loadGallery);
     </script>
 </body>
 </html>
