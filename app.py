@@ -11,7 +11,7 @@ from typing import List, Dict, Any, Optional
 from PIL import Image
 from urllib.parse import urlparse
 import requests
-
+import glob
 
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 from dotenv import load_dotenv
@@ -903,6 +903,53 @@ def results():
     # A galeria é carregada via JavaScript/fetch no lado do cliente.
     return render_template('results.html', job_id=job_id)
 
+
+# Esta rota busca os arquivos dentro da pasta generated/ID_DO_JOB
+@app.route("/regenerated_json") # Use @app.route para garantir que o Flask registre
+def regenerated_json():
+    
+    job_id = request.args.get("job_id", "").strip()
+    items = []
+    
+    # Tenta buscar na memória RAM
+    job = JOBS.get(job_id)
+    if job:
+        for page in job.get("pages", []):
+            for m in page.get("image_meta", []):
+                if m and m.get("src"):
+                    items.append(m)
+
+    # Busca física na pasta caso a memória falhe (essencial)
+    static_root = os.path.join(app.root_path, "static")
+    job_dir = os.path.join(static_root, "generated", job_id)
+    
+    if os.path.isdir(job_dir):
+        import glob
+        # Procura por arquivos de imagem na pasta do job
+        files = sorted(glob.glob(os.path.join(job_dir, "*.*")))
+        for fpath in files:
+            if fpath.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                fname = os.path.basename(fpath)
+                url = f"/static/generated/{job_id}/{fname}"
+                # Evita duplicar se já estiver na lista
+                if not any(it['src'] == url for it in items):
+                    items.append({
+                        "src": url,
+                        "w": 1024, "h": 1024,
+                        "prompt": "Imagem recuperada"
+                    })
+
+    return jsonify({"items": items})
+
+
+# Esta rota decide qual página abrir quando você clica no botão
+@app.route("/results")
+@app.route("/regenerated")
+def regenerated_page():
+    job_id = request.args.get("job_id", "").strip()
+    # Note que aqui estamos usando o arquivo 'regenerated.html' que você enviou
+    return render_template("regenerated.html", job_id=job_id)
+
 # Nota: A rota '/regenerated_json' também é usada pelo results.html
 # Certifique-se de que a rota '/regenerated_json' esteja definida corretamente
 # para retornar a lista de imagens para o job_id.
@@ -1066,63 +1113,7 @@ if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5001, debug=True, use_reloader=False)
 
 
-@app.get("/regenerated_json")
-def regenerated_json():
-    job_id = (request.args.get("job_id") or "").strip()
-    if not job_id:
-        return jsonify({"error":"missing job_id"}), 400
-    items = []
-    job = JOBS.get(job_id) or {}
-    pages = job.get("pages", [])
-    for pidx, page in enumerate(pages):
-        metas = page.get("image_meta") or []
-        for i, m in enumerate(metas):
-            if not m: continue
-            items.append({
-                "page_index": pidx,
-                "version": i+1,
-                "src": m.get("src"),
-                "w": m.get("w"),
-                "h": m.get("h"),
-                "prompt": m.get("prompt")
-            })
-    if not items:
-        # Tenta localizar a pasta static corretamente
-        static_root = app.static_folder or os.path.join(app.root_path, "static")
-        target_dir = os.path.join(static_root, "generated", job_id)
-        
-        if os.path.isdir(target_dir):
-            import glob
-            # Pega extensões comuns de imagem
-            files = []
-            for ext in ('*.png', '*.jpg', '*.jpeg', '*.webp'):
-                files.extend(glob.glob(os.path.join(target_dir, ext)))
-            
-            for idx, fpath in enumerate(sorted(files), start=1):
-                # Transforma o caminho do sistema operacional em URL acessível pelo navegador
-                rel_path = os.path.relpath(fpath, static_root).replace("\\", "/")
-                url = f"/static/{rel_path}"
-                
-                items.append({
-                    "page_index": 0, 
-                    "version": idx, 
-                    "src": url, 
-                    "w": 1024, # Valor padrão para não quebrar o layout
-                    "h": 1024, 
-                    "prompt": "Imagem recuperada do servidor"
-                })
-    
-    return jsonify({"job_id": job_id, "items": items})
 
-
-@app.get("/regenerated")
-def regenerated_page():
-    try:
-        job_id = (request.args.get("job_id") or "").strip()
-    except Exception:
-        job_id = ""
-    # A página monta a lista via /regenerated_json; manter vazio aqui
-    return render_template("regenerated.html", job_id=job_id, items=[])
 
 
 @app.get("/dl")

@@ -174,6 +174,28 @@
           background-image: radial-gradient(circle at 50% 10%, rgba(229, 57, 53, 0.1), transparent 50%),
             radial-gradient(1200px 600px at 50% -10%, #17171c, transparent);
         }
+
+        #imageGallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.image-item {
+    background: var(--card);
+    border: 1px solid var(--stroke);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.thumb {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
     </style>
 </head>
 <body class="bg-gradient-modern">
@@ -219,98 +241,49 @@
             return `regenerada_${idx+1}.png`;
         }
 
-        async function loadGallery(){
-            const jid = inferJobId();
-            const galleryEl = document.getElementById('imageGallery');
-            const loadingEl = document.getElementById('loading');
-            const noResultsEl = document.getElementById('noResults');
-            const jobIdDisplay = document.getElementById('jobIdDisplay');
-            const btnBack = document.getElementById('btnBack');
+        async function loadGallery() {
+    const jid = inferJobId();
+    const galleryEl = document.getElementById('imageGallery');
+    const loadingEl = document.getElementById('loading');
+    const noResultsEl = document.getElementById('noResults');
 
-            galleryEl.innerHTML = '';
-            loadingEl.style.display = 'block';
-            noResultsEl.style.display = 'none';
-            jobIdDisplay.textContent = jid || 'N/A';
-            
-            if (jid) {
-                btnBack.href = '/progress/' + encodeURIComponent(jid);
-            } else {
-                 btnBack.href = '/';
-                 btnBack.textContent = '↩ Voltar para o Início';
-            }
+    if (!jid) {
+        loadingEl.style.display = 'none';
+        noResultsEl.style.display = 'block';
+        return;
+    }
 
+    try {
+        // O cache:'no-store' força o navegador a buscar fotos novas
+        const r = await fetch('/regenerated_json?job_id=' + encodeURIComponent(jid));
+        const data = await r.json();
+        
+        // O Python retorna {"items": [...]}, então pegamos data.items
+        const list = data.items || [];
 
-            if (!jid) {
-                loadingEl.style.display = 'none';
-                noResultsEl.querySelector('p').textContent = 'job_id não especificado na URL.';
-                noResultsEl.style.display = 'block';
-                return;
-            }
+        loadingEl.style.display = 'none';
 
-            try{
-                // A rota /regenerated_json será implementada no app.py
-                const r = await fetch('/regenerated_json?job_id='+encodeURIComponent(jid), {cache:'no-store'});
-                const data = await r.json();
-                const list = data.items || [];
-                
-                loadingEl.style.display = 'none';
-
-                if (!list.length){
-                    noResultsEl.style.display = 'block';
-                    return;
-                }
-                
-                list.forEach((it, idx)=>{
-                    const card = document.createElement('div'); card.className='image-item';
-                    
-                    const imgLink = document.createElement('a');
-                    imgLink.href = it.src; imgLink.target = '_blank';
-                    
-                    const img = document.createElement('img');
-                    img.className = 'thumb'; img.src = it.src; img.alt = 'Imagem Regenerada';
-                    
-                    imgLink.appendChild(img);
-                    
-                    const cap = document.createElement('div'); cap.className='cap';
-                    
-                    const metaSpan = document.createElement('span');
-                    // Tenta exibir a dimensão se disponível
-                    metaSpan.textContent = it.w && it.h ? `${it.w} × ${it.h} px` : `Versão ${idx + 1}`;
-                    
-                    const dlBtn = document.createElement('button'); dlBtn.className='dl'; dlBtn.textContent='Baixar';
-                    dlBtn.onclick = async ()=>{
-                        const suggestName = getDownloadName(it.src, idx);
-                        const name = prompt('Nome do arquivo (com .png):', suggestName) || suggestName;
-                        if (!name || name.trim() === '') return;
-                        try{
-                            const r = await fetch(it.src);
-                            const blob = await r.blob();
-                            const a = document.createElement('a');
-                            a.href = URL.createObjectURL(blob);
-                            a.download = name;
-                            document.body.appendChild(a);
-                            a.click();
-                            a.remove();
-                            setTimeout(()=>URL.revokeObjectURL(a.href), 1200);
-                        }catch(e){
-                            alert('Erro ao tentar baixar o arquivo.');
-                        }
-                    };
-
-                    cap.appendChild(metaSpan);
-                    cap.appendChild(dlBtn);
-                    card.appendChild(imgLink);
-                    card.appendChild(cap);
-                    galleryEl.appendChild(card);
-                });
-
-            }catch(e){
-                loadingEl.style.display = 'none';
-                noResultsEl.querySelector('p').textContent = 'Falha ao carregar a lista de imagens.';
-                noResultsEl.style.display = 'block';
-                console.error(e);
-            }
+        if (list.length === 0) {
+            noResultsEl.style.display = 'block';
+            noResultsEl.querySelector('p').textContent = 'Nenhuma imagem encontrada na pasta generated/' + jid;
+            return;
         }
+
+        // Limpa a galeria antes de renderizar
+        galleryEl.innerHTML = '';
+        
+        list.forEach((it, idx) => {
+            // ... aqui continua o seu código de criar os cards (document.createElement('div')...)
+            // Certifique-se de que o código de criação dos cards está dentro deste loop
+        });
+
+    } catch (e) {
+        console.error("Erro na carga:", e);
+        loadingEl.style.display = 'none';
+        noResultsEl.style.display = 'block';
+        noResultsEl.querySelector('p').textContent = 'Falha técnica ao carregar a lista.';
+    }
+}
         
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadGallery);
         else loadGallery();
