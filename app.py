@@ -907,39 +907,36 @@ def results():
 # Esta rota busca os arquivos dentro da pasta generated/ID_DO_JOB
 @app.route("/regenerated_json") # Use @app.route para garantir que o Flask registre
 def regenerated_json():
-    
-    job_id = request.args.get("job_id", "").strip()
     items = []
-    
-    # Tenta buscar na memória RAM
-    job = JOBS.get(job_id)
-    if job:
-        for page in job.get("pages", []):
-            for m in page.get("image_meta", []):
-                if m and m.get("src"):
-                    items.append(m)
+    try:
+        # Localiza a pasta static/generated
+        static_root = app.static_folder or os.path.join(app.root_path, "static")
+        generated_base = os.path.join(static_root, "generated")
 
-    # Busca física na pasta caso a memória falhe (essencial)
-    static_root = os.path.join(app.root_path, "static")
-    job_dir = os.path.join(static_root, "generated", job_id)
+        if os.path.exists(generated_base):
+            # Varre todas as subpastas de forma recursiva
+            for root, dirs, files in os.walk(generated_base):
+                for file in files:
+                    if file.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                        full_path = os.path.join(root, file)
+                        # Transforma o caminho do disco em URL (/static/generated/...)
+                        rel_path = os.path.relpath(full_path, static_root).replace("\\", "/")
+                        url = f"/static/{rel_path}"
+                        
+                        items.append({
+                            "src": url,
+                            "w": 1024,
+                            "h": 1024,
+                            "prompt": f"Arquivo: {file}"
+                        })
+        
+        # Inverte para mostrar as mais recentes primeiro
+        items.reverse()
+        return jsonify({"items": items})
     
-    if os.path.isdir(job_dir):
-        import glob
-        # Procura por arquivos de imagem na pasta do job
-        files = sorted(glob.glob(os.path.join(job_dir, "*.*")))
-        for fpath in files:
-            if fpath.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
-                fname = os.path.basename(fpath)
-                url = f"/static/generated/{job_id}/{fname}"
-                # Evita duplicar se já estiver na lista
-                if not any(it['src'] == url for it in items):
-                    items.append({
-                        "src": url,
-                        "w": 1024, "h": 1024,
-                        "prompt": "Imagem recuperada"
-                    })
-
-    return jsonify({"items": items})
+    except Exception as e:
+        print(f"Erro na busca global: {e}")
+        return jsonify({"items": [], "error": str(e)}), 500
 
 
 # Esta rota decide qual página abrir quando você clica no botão

@@ -212,7 +212,7 @@
 
         <section class="card">
             <h1>Galeria de Imagens Regeneradas</h1>
-            <p style="color:var(--muted); margin: 8px 0 20px;">Todas as imagens geradas como variações a partir de um parágrafo original do job: <strong id="jobIdDisplay">N/A</strong></p>
+            <p style="color:var(--muted); margin: 8px 0 20px;">Abaixo, você encontra todas as imagens geradas.</p>
             <div id="imageGallery" class="grid">
                 </div>
             <div id="loading" style="text-align:center; padding: 20px; display:none;">
@@ -242,46 +242,59 @@
         }
 
         async function loadGallery() {
-    const jid = inferJobId();
     const galleryEl = document.getElementById('imageGallery');
     const loadingEl = document.getElementById('loading');
     const noResultsEl = document.getElementById('noResults');
 
-    if (!jid) {
-        loadingEl.style.display = 'none';
-        noResultsEl.style.display = 'block';
-        return;
-    }
-
     try {
-        // O cache:'no-store' força o navegador a buscar fotos novas
-        const r = await fetch('/regenerated_json?job_id=' + encodeURIComponent(jid));
-        const data = await r.json();
+        // Chamada para a rota que agora devolve TUDO
+        const r = await fetch('/regenerated_json', { cache: 'no-store' });
+        if (!r.ok) throw new Error("Erro na resposta do servidor");
         
-        // O Python retorna {"items": [...]}, então pegamos data.items
+        const data = await r.json();
         const list = data.items || [];
 
         loadingEl.style.display = 'none';
 
         if (list.length === 0) {
             noResultsEl.style.display = 'block';
-            noResultsEl.querySelector('p').textContent = 'Nenhuma imagem encontrada na pasta generated/' + jid;
+            noResultsEl.querySelector('p').textContent = 'Nenhuma imagem encontrada na pasta generated.';
             return;
         }
 
-        // Limpa a galeria antes de renderizar
+        // Limpa a galeria antes de renderizar tudo
         galleryEl.innerHTML = '';
         
         list.forEach((it, idx) => {
-            // ... aqui continua o seu código de criar os cards (document.createElement('div')...)
-            // Certifique-se de que o código de criação dos cards está dentro deste loop
+            const card = document.createElement('div');
+            card.className = 'image-card'; // Use a classe que já existe no seu CSS
+
+            // Cria o link e a imagem
+            const imgLink = document.createElement('a');
+            imgLink.href = it.src;
+            imgLink.target = '_blank';
+            
+            const img = document.createElement('img');
+            img.src = it.src;
+            img.loading = 'lazy';
+            
+            imgLink.appendChild(img);
+            card.appendChild(imgLink);
+            
+            // Adiciona a legenda (opcional)
+            const cap = document.createElement('div');
+            cap.className = 'image-caption';
+            cap.innerHTML = `<span>${it.prompt}</span>`;
+            card.appendChild(cap);
+
+            galleryEl.appendChild(card);
         });
 
     } catch (e) {
-        console.error("Erro na carga:", e);
+        console.error("Erro ao carregar galeria global:", e);
         loadingEl.style.display = 'none';
         noResultsEl.style.display = 'block';
-        noResultsEl.querySelector('p').textContent = 'Falha técnica ao carregar a lista.';
+        noResultsEl.querySelector('p').textContent = 'Falha ao carregar a galeria global.';
     }
 }
         
